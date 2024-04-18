@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.ugarciac</groupId>
-	<artifactId>springsecuritybasics</artifactId>
+	<artifactId>springbackendapplication</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>springsecuritybasics</name>
+	<name>springbackendapplication</name>
 	<description>Demo project for Spring Boot and Spring Security</description>
 	<properties>
 		<java.version>17</java.version>

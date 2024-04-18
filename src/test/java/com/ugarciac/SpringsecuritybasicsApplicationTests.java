@@ -1,10 +1,10 @@
-package com.ugarciac.springsecuritybasics;
+package com.ugarciac;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SpringsecuritybasicsApplicationTests {
+class SpringBackendApplicationTests {
 
 	@Test
 	void contextLoads() {
