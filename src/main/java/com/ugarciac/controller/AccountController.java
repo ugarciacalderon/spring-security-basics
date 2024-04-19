@@ -8,6 +8,6 @@ public class AccountController {
 
     @GetMapping("/myAccount")
     public String myAccount() {
-        return "Hello World";
+        return "Hello from /myAccount";
     }
 }
