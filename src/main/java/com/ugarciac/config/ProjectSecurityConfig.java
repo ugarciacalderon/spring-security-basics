@@ -1,17 +1,13 @@
 package com.ugarciac.config;
 
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.sql.DataSource;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -25,9 +21,10 @@ public class ProjectSecurityConfig {
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());*/
 
-        http.authorizeHttpRequests((requests) -> requests
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount","/myBalance","/myCards","/myLoans").authenticated()
-                        .requestMatchers("/notices","/contact").permitAll())
+                        .requestMatchers("/notices","/contact","/register").permitAll())
 
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults());
@@ -42,6 +39,6 @@ public class ProjectSecurityConfig {
     }*/
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 }
