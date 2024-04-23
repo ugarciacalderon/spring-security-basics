@@ -21,10 +21,23 @@ public class ProjectSecurityConfig {
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());*/
 
-        http.csrf(AbstractHttpConfigurer::disable)
+        // para aceptar los usuarios autenticados, no se toma en cuenta su autoridad
+/*        http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount","/myBalance","/myCards","/myLoans").authenticated()
                         .requestMatchers("/notices","/contact","/register").permitAll())
+
+                .formLogin(withDefaults())
+                .httpBasic(withDefaults());
+                */
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers("/myAccount","/myBalance","/myCards","/myLoans").hasAuthority("VIEWACCOUNT")
+                        .requestMatchers("/notices","/contact","/register").hasAnyAuthority("VIEWACCOUNT","VIEWBALANCE")
+                        .requestMatchers("/register").authenticated()
+                        .requestMatchers("/notices").permitAll()
+                        .requestMatchers("/myBalance").hasRole("USER")
+                        .requestMatchers("/myLoans").hasAnyRole("USER","ADMIN"))
 
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults());
