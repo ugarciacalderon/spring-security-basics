@@ -1,9 +1,9 @@
 package com.ugarciac.config;
 
+import com.ugarciac.model.Authority;
 import com.ugarciac.model.Customer;
 import com.ugarciac.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,12 +30,11 @@ public class UsernamePwdAuthtenticationProvider implements AuthenticationProvide
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();
         String pwd = authentication.getCredentials().toString();
+
         List<Customer> customer = customerRepository.findByEmail(username);
         if (!customer.isEmpty()) {
             if (passwordEncoder.matches(pwd, customer.get(0).getPassword())) {
-                List<GrantedAuthority> authorities = new ArrayList<>();
-                authorities.add(new SimpleGrantedAuthority(customer.get(0).getRole()));
-                return new UsernamePasswordAuthenticationToken(username, pwd, authorities);
+                    return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(customer.get(0).getAuthorities()));
             } else {
                 throw new BadCredentialsException("Invalid password!");
             }
@@ -43,6 +42,15 @@ public class UsernamePwdAuthtenticationProvider implements AuthenticationProvide
             throw new BadCredentialsException("No user registered with this details!");
         }
     }
+
+    private List<GrantedAuthority> getGrantedAuthorities(List<Authority> authorities) {
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        for (Authority authority : authorities) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(authority.getRole()));
+        }
+        return grantedAuthorities;
+    }
+
 
     @Override
     public boolean supports(Class<?> authentication) {
