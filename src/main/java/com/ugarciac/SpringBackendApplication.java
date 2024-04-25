@@ -9,7 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @SpringBootApplication
 @EnableJpaRepositories("com.ugarciac.repository")
 @EntityScan("com.ugarciac.model")
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 public class SpringBackendApplication {
 
 	public static void main(String[] args) {

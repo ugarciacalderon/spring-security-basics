@@ -1,16 +1,26 @@
 package com.ugarciac.config;
 
 import com.ugarciac.filter.AuthoritiesLoggingAtFilter;
+import com.ugarciac.filter.JWTTokenGeneratorFilter;
+import com.ugarciac.filter.JWTTokenValidationFilter;
 import com.ugarciac.filter.RequestValidationBeforeFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -33,9 +43,22 @@ public class ProjectSecurityConfig {
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults());
                 */
-        http.csrf(AbstractHttpConfigurer::disable)
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName("_csrf");
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        CorsConfiguration config = new CorsConfiguration();
+                        config.setExposedHeaders(Arrays.asList("Authorization"));
+                        config.setMaxAge(3600L);
+                        return config;
+                    }
+                })).csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class) // filtro que se ejecuta antes de la autenticación
                 .addFilterAfter(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class) // filtro que se ejecuta despues de la autenticación
+                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenValidationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount","/myBalance","/myCards","/myLoans").hasAuthority("VIEWACCOUNT")
                         .requestMatchers("/notices","/contact","/register").hasAnyAuthority("VIEWACCOUNT","VIEWBALANCE")
@@ -51,10 +74,10 @@ public class ProjectSecurityConfig {
 //        http.httpBasic(withDefaults());
         return http.build();
     }
-/*    @Bean
-    public UserDetailsService userDetailsService(DataSource dataSource) {
-        return new JdbcUserDetailsManager(dataSource);
-    }*/
+    /*    @Bean
+        public UserDetailsService userDetailsService(DataSource dataSource) {
+            return new JdbcUserDetailsManager(dataSource);
+        }*/
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
