@@ -1,8 +1,8 @@
 package com.ugarciac.config;
 
-import com.ugarciac.model.Authority;
-import com.ugarciac.model.Customer;
-import com.ugarciac.repository.CustomerRepository;
+import com.ugarciac.model.Authorities;
+import com.ugarciac.model.Users;
+import com.ugarciac.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,7 +21,7 @@ import java.util.List;
 public class UsernamePwdAuthtenticationProvider implements AuthenticationProvider {
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private UsersRepository usersRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -31,10 +31,10 @@ public class UsernamePwdAuthtenticationProvider implements AuthenticationProvide
         String username = authentication.getName();
         String pwd = authentication.getCredentials().toString();
 
-        List<Customer> customer = customerRepository.findByEmail(username);
-        if (!customer.isEmpty()) {
-            if (passwordEncoder.matches(pwd, customer.get(0).getPassword())) {
-                    return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(customer.get(0).getAuthorities()));
+        List<Users> users = usersRepository.findByUsername(username);
+        if (!users.isEmpty()) {
+            if (passwordEncoder.matches(pwd, users.get(0).getPassword())) {
+                    return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(users.get(0).getAuthorities()));
             } else {
                 throw new BadCredentialsException("Invalid password!");
             }
@@ -43,10 +43,10 @@ public class UsernamePwdAuthtenticationProvider implements AuthenticationProvide
         }
     }
 
-    private List<GrantedAuthority> getGrantedAuthorities(List<Authority> authorities) {
+    private List<GrantedAuthority> getGrantedAuthorities(List<Authorities> authorities) {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        for (Authority authority : authorities) {
-            grantedAuthorities.add(new SimpleGrantedAuthority(authority.getRole()));
+        for (Authorities authority : authorities) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(authority.getRoleName()));
         }
         return grantedAuthorities;
     }

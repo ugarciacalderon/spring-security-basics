@@ -1,59 +1,30 @@
-create database databank;
+drop database users;
+drop table users;
+create database users;
 
-use databank;
+use users;
 
-create table `users` (
-                         `id` INT NOT NULL AUTO_INCREMENT,
-                         `username` VARCHAR(25) not null,
-                         `password` VARCHAR(25) not null,
+CREATE TABLE `users` (
+                         `user_id` int NOT NULL AUTO_INCREMENT,
+                         `username` varchar(100) NOT NULL,
+                         `password` varchar(500) NOT NULL,
+                         `email` varchar(100) NOT NULL,
+                         `mobile_number` varchar(20) NOT NULL,
+                         `createdAt` DATETIME DEFAULT NULL,
+                         `updatedAt` DATETIME null,
                          `enabled` INT not null,
-                         primary key (`id`)
+                         PRIMARY KEY (`user_id`)
 );
-
-create table `authorities` (
-                               `id` INT NOT NULL AUTO_INCREMENT,
-                               `username` VARCHAR(25) not null,
-                               `authority` VARCHAR(25) not null,
-                               primary key (`id`)
-);
-
-create table `customer` (
-                            `id` INT NOT NULL AUTO_INCREMENT,
-                            `email` VARCHAR(25) not null,
-                            `password` VARCHAR(25) not null,
-                            `role` VARCHAR(25) not null,
-                            primary key (`id`)
-);
-
-insert ignore into `users` values (null,'ulises_gc','ygsadyas','1');
-insert ignore into `authorities` values (null,'ulises_gc','write');
-insert ignore into `customer` values (null,'ugarciacalderon@gmail.com','12345','admin');
-
 
 CREATE TABLE `authorities` (
-                               `id` int NOT NULL AUTO_INCREMENT,
-                               `customer_id` int NOT NULL,
+                               `authId` int NOT NULL AUTO_INCREMENT,
                                `name` varchar(50) NOT NULL,
-                               PRIMARY KEY (`id`),
-                               KEY `customer_id` (`customer_id`),
-                               CONSTRAINT `authorities_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`)
+                               `description` VARCHAR(25) not null,
+                               `createdAt` DATETIME not null,
+                               `updatedAt` DATETIME null,
+                               `enabled` BOOL not null,
+                               `user_id` int NOT NULL,
+                               PRIMARY KEY (`authId`),
+                               KEY `user_id` (`user_id`),
+                               CONSTRAINT `userId_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 );
-
-INSERT INTO `authorities` (`customer_id`, `name`)
-VALUES (1, 'VIEWACCOUNT');
-
-INSERT INTO `authorities` (`customer_id`, `name`)
-VALUES (1, 'VIEWCARDS');
-
-INSERT INTO `authorities` (`customer_id`, `name`)
-VALUES (1, 'VIEWLOANS');
-
-INSERT INTO `authorities` (`customer_id`, `name`)
-VALUES (1, 'VIEWBALANCE');
-
-INSERT INTO `authorities` (`customer_id`, `name`)
-VALUES (1, 'ROLE_USER');
-
-INSERT INTO `authorities` (`customer_id`, `name`)
-VALUES (1, 'ROLE_ADMIN');
-

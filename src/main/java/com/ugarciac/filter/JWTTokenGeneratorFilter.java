@@ -27,7 +27,7 @@ public class JWTTokenGeneratorFilter extends OncePerRequestFilter {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (null != authentication) {
             SecretKey key = Keys.hmacShaKeyFor(SecurityConstants.JWT_KEY.getBytes(StandardCharsets.UTF_8));
-            String jwt = Jwts.builder().issuer("ugarciac_token").subject("Access Token")
+            String jwt = Jwts.builder().issuer("ugarciac_token").subject("JWT Token")
                     .claim("username", authentication.getName())
                     .claim("authorities", populateAuthorities(authentication.getAuthorities()))
                     .issuedAt(new Date())

@@ -1,23 +1,18 @@
 package com.ugarciac.config;
 
 import com.ugarciac.filter.*;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,14 +29,14 @@ public class ProjectSecurityConfig {
         http.httpBasic(withDefaults());*/
 
         // para aceptar los usuarios autenticados, no se toma en cuenta su autoridad
-/*        http.csrf(AbstractHttpConfigurer::disable)
+        /*http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount","/myBalance","/myCards","/myLoans").authenticated()
-                        .requestMatchers("/notices","/contact","/register").permitAll())
+                        .requestMatchers("/notices","/contact","/registerUser").permitAll())
 
                 .formLogin(withDefaults())
-                .httpBasic(withDefaults());
-                */
+                .httpBasic(withDefaults()); */
+
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -54,7 +49,7 @@ public class ProjectSecurityConfig {
                     config.setExposedHeaders(List.of("Authorization"));
                     config.setMaxAge(3600L);
                     return config;
-                })).csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact","/register")
+                })).csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class) // filtro que se ejecuta antes de la autenticación
@@ -63,8 +58,8 @@ public class ProjectSecurityConfig {
                 .addFilterBefore(new JWTTokenValidationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount","/myBalance","/myCards","/myLoans").hasAuthority("VIEWACCOUNT")
-                        .requestMatchers("/notices","/contact","/register").hasAnyAuthority("VIEWACCOUNT","VIEWBALANCE")
-                        .requestMatchers("/register").authenticated()
+                        .requestMatchers("/notices","/contact").hasAnyAuthority("VIEWACCOUNT","VIEWBALANCE")
+                        .requestMatchers("/registerUser").permitAll()
                         .requestMatchers("/notices").permitAll()
                         .requestMatchers("/myBalance").hasRole("USER")
                         .requestMatchers("/myLoans").hasAnyRole("USER","ADMIN"))
@@ -72,14 +67,9 @@ public class ProjectSecurityConfig {
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults());
 
-//        http.formLogin(withDefaults());
-//        http.httpBasic(withDefaults());
         return http.build();
     }
-/*    @Bean
-    public UserDetailsService userDetailsService(DataSource dataSource) {
-        return new JdbcUserDetailsManager(dataSource);
-    }*/
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
